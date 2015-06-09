@@ -109,7 +109,7 @@ class Client extends EventEmitter
           @logger.debug 'ping'
           @_send {"type": "ping"}
           if @_lastPong? and Date.now() - @_lastPong > 10000
-            @logger.error "Last pong is too old: %d", (Date.now() - @_lastPong) / 1000
+            @logger.error "Last pong is too old: %d s", (Date.now() - @_lastPong) / 1000
             @authenticated = false
             @connected = false
             @reconnect()
@@ -536,6 +536,8 @@ class Client extends EventEmitter
 
     post_data = querystring.stringify(params)
 
+    timer = undefined
+
     options = 
       hostname: @host,
       method: 'POST',
@@ -544,9 +546,16 @@ class Client extends EventEmitter
         'Content-Type': 'application/x-www-form-urlencoded',
         'Content-Length': post_data.length
 
+    timeout = ()=>
+      callback {'ok':false, 'error':'timeout'}
+
+    timer = setTimeout timeout,10*1000
+
     req = https.request(options)
 
     req.on 'response', (res) =>
+      timer && clearTimeout timer
+
       buffer = ''
       res.on 'data', (chunk) ->
         buffer += chunk
