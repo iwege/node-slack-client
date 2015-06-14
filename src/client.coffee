@@ -108,7 +108,7 @@ class Client extends EventEmitter
 
           @logger.debug 'ping'
           @_send {"type": "ping"}
-          if @_lastPong? and Date.now() - @_lastPong > 10000
+          if @_lastPong? and Date.now() - @_lastPong > 200000
             @logger.error "Last pong is too old: %d s", (Date.now() - @_lastPong) / 1000
             @authenticated = false
             @connected = false
@@ -549,7 +549,7 @@ class Client extends EventEmitter
     timeout = ()=>
       callback {'ok':false, 'error':'timeout'}
 
-    timer = setTimeout timeout,10*1000
+    timer = setTimeout timeout,20*1000
 
     req = https.request(options)
 
